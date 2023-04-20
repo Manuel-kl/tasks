@@ -1,12 +1,12 @@
 <template>
   <div>
-    <home-component />
+    <login-component />
   </div>
 </template>
 <script>
-import HomeComponent from '@/components/Tasks/HomeComponent.vue';
+import LoginComponent from '@/components/Auth/LoginComponent.vue';
 export default {
-  components: { HomeComponent },
+  components: { LoginComponent },
   props: {},
   data() {
     return {};
