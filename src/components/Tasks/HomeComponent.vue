@@ -169,6 +169,7 @@ export default {
                         const index = this.tasks.findIndex(task => task.id === response.data.task.id);
                         if (index !== -1) {
                             this.tasks.splice(index, 1, response.data.task);
+                            this.unshift(response.data.task);
                         }
                         this.response = response.data.message;
                         this.updateTask = false;
