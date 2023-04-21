@@ -50,6 +50,9 @@ export default {
                 .then((response) => {
                     if (response.data.access_token) {
                         this.response = response.data.message;
+                        setTimeout(() => {
+                            this.$router.push('/login');
+                        }, 2000);
                         this.loading = false;
                         localStorage.setItem('access_token', response.data.access_token);
                         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -58,10 +61,16 @@ export default {
                     else {
                         this.loading = false;
                         this.error = response.data.message
+                        setTimeout(() => {
+                            this.error = '';
+                        }, 2000);
                     }
                 })
                 .catch((error) => {
                     this.error = error.response.data.message;
+                    setTimeout(() => {
+                        this.error = '';
+                    }, 2000);
                     this.loading = false;
                     console.log(error);
                 })
@@ -159,7 +168,7 @@ export default {
     color: #721c24;
     background-color: var(--warning);
     border-color: var(--warning);
-    padding: 0.75rem 1.25rem;
+    padding: 0.4rem 1.25rem;
     margin-bottom: 1rem;
     border: 1px solid transparent;
     border-radius: 0.25rem;
@@ -169,7 +178,7 @@ export default {
     color: #155724;
     background-color: #d4edda;
     border-color: #c3e6cb;
-    padding: 0.75rem 1.25rem;
+    padding: 0.4rem 1.25rem;
     margin-bottom: 1rem;
     border: 1px solid transparent;
     border-radius: 0.25rem;
