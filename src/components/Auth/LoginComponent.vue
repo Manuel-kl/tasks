@@ -12,7 +12,7 @@
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="Password" v-model="password"
+                <input type="password" class="form-control" id="password" placeholder="Password" v-model="password" min="6"
                     required>
             </div>
             <button type="submit" v-if="!loading">Login</button>

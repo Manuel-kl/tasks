@@ -9,11 +9,12 @@
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email"
-                    v-model="email">
+                    v-model="email" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="Password" v-model="password">
+                <input type="password" class="form-control" id="password" placeholder="Password" v-model="password" min="6"
+                    required>
             </div>
             <button type="submit" v-if="!loading">Register</button>
         </form>
