@@ -18,6 +18,13 @@ const routes = [{
         component: () =>
             import ( /* webpackChunkName: "register" */ '../views/RegisterView.vue')
     },
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: () =>
+            import ( /* webpackChunkName: "not-found" */ '../views/NotFoundView.vue')
+
+    }
 ]
 
 const isAuthenticated = () => {

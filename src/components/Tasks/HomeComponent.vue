@@ -1,9 +1,18 @@
 <template>
     <div class="home">
         <nav>
-            <h2>Welcome {{ user.email }}</h2>
-            <h3 @click="logout">Log Out</h3>
-            <h3 @click="deleteAccount" class="delete-account">Delete Account</h3>
+            <div class="lg">
+                <h2>Welcome {{ user.email }}</h2>
+                <h3 @click="logout">Log Out</h3>
+                <h3 @click="deleteAccount" class="delete-account">Delete Account</h3>
+            </div>
+            <div class="sm">
+                <h2>Welcome {{ user.email }}</h2>
+                <div>
+                    <h3 @click="logout">Log Out</h3>
+                    <h3 @click="deleteAccount" class="delete-account">Delete Account</h3>
+                </div>
+            </div>
         </nav>
         <h1>Tasks</h1>
 
@@ -42,12 +51,17 @@
                 <button type="submit" class="add-new-button" v-if="showForm">Add Task</button>
                 <button type="submit" class="add-new-button" v-if="updateTask">Edit Task</button>
             </form>
+            <div class="loading" v-if="loading">
+                <img src="../../assets/loading.gif" alt="loading gif">
+            </div>
             <div class="response" v-if="response || error">
                 <p class="success" v-if="response">{{ response }}</p>
                 <p class="error" v-if="error">{{ error }}</p>
             </div>
         </div>
+
         <div class="task-list">
+
             <div v-for="task in tasks" :key="task.id" class="task">
                 <div v-if="task.is_completed === 1">
                     <h4 class="title done-task">Name: {{ task.name }}</h4>
@@ -86,6 +100,7 @@ export default {
         return {
             showForm: false,
             updateTask: false,
+            loading: false,
             user: {
                 email: ''
             },
@@ -117,6 +132,7 @@ export default {
         },
         postTask() {
             if (this.showForm) {
+                this.loading = true;
                 axios.post('api/create-task', {
                     user_id: this.user.id,
                     name: this.name,
@@ -129,6 +145,7 @@ export default {
                     deleted_at: this.deleted_at
                 })
                     .then(response => {
+                        this.loading = false;
                         this.tasks.unshift(response.data.task);
                         this.response = response.data.message;
                         this.showForm = false;
@@ -144,6 +161,7 @@ export default {
 
                     })
                     .catch(error => {
+                        this.loading = false;
                         console.log(error);
                         this.error = error.response.data.message;
                         setTimeout(() => {
@@ -152,6 +170,7 @@ export default {
                     });
             }
             else {
+                this.loading = true;
                 axios.put(`api/update-task/${this.taskID}`,
                     {
                         id: this.taskID,
@@ -166,16 +185,14 @@ export default {
                         deleted_at: this.deleted_at
                     })
                     .then(response => {
-                        const index = this.tasks.findIndex(task => task.id === response.data.task.id);
-                        if (index !== -1) {
-                            this.tasks.splice(index, 1, response.data.task);
-                            this.unshift(response.data.task);
-                        }
-                        this.response = response.data.message;
+                        this.loading = false;
                         this.updateTask = false;
+                        this.showForm = false;
+                        this.response = response.data.message;
                         setTimeout(() => {
                             this.response = '';
                         }, 5000);
+                        this.getTasks();
                         this.name = '';
                         this.description = '';
                         this.due_date = '';
@@ -185,6 +202,11 @@ export default {
 
                     })
                     .catch(error => {
+                        this.loading = false;
+                        this.error = error.response.data.message;
+                        setTimeout(() => {
+                            this.error = '';
+                        }, 5000);
                         console.log(error.response.data.message);
                     });
             }
@@ -195,9 +217,8 @@ export default {
         },
         editTask(id) {
             this.taskID = id
-            console.log(this.taskID)
-            this.updateTask = true;
             this.showForm = false;
+            this.updateTask = true;
             const postForm = document.getElementById('post-task');
             postForm.scrollIntoView();
             this.name = this.tasks.find(task => task.id === id).name;
@@ -210,28 +231,34 @@ export default {
             console.log(this.name)
         },
         getTasks() {
+            this.loading = true;
             axios.get('api/get-tasks', {
                 params: {
                     user_id: this.user.id
                 }
             })
                 .then(response => {
+                    this.loading = false;
                     this.tasks = response.data.tasks;
                 })
                 .catch(error => {
+                    this.loading = false;
                     console.log(error)
                 })
         },
         deleteTask(id) {
+            this.loading = true;
             axios.delete(`api/delete-task/${id}`,
                 {
                     params: { user_id: this.user.id }
                 })
                 .then(response => {
+                    this.loading = false;
                     const index = this.tasks.findIndex(task => task.id === id);
                     this.tasks.splice(index, 1);
                 })
                 .catch(error => {
+                    this.loading = false;
                     console.log(error);
                 });
         },
@@ -277,37 +304,42 @@ export default {
 .home {
     display: flex;
     flex-direction: column;
-    width: 60%;
     align-items: center;
-    margin: auto;
-    background-color: #f1f1f1;
+    height: 100%;
+    padding-bottom: 2rem;
+    background-color: var(--background-color);
+    font-family: var(--font-family-base);
 }
 
-.home nav {
+.home nav .lg {
     display: flex;
     flex-direction: row;
     gap: 4rem;
     width: 100%;
     align-items: center;
     justify-content: center;
-    background-color: #f1f1f1;
+    background-color: var(--background-color);
     padding: .4rem 0;
-    border-bottom: 1px groove gray;
+    border-bottom: 1px groove var(--gray);
+}
+
+.home .sm {
+    display: none;
 }
 
 .home nav h2 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     padding: 1rem;
 }
 
 .home nav h3 {
-    font-size: 1.3rem;
+    font-size: 1rem;
     cursor: pointer;
     padding: .6rem 1rem;
 }
 
 .home nav h3:hover {
-    background-color: rgb(206, 151, 151);
+    background-color: var(--warning);
     border-radius: 5px;
     text-decoration: underline;
 }
@@ -327,7 +359,7 @@ export default {
 }
 
 .home .delete-account:hover {
-    background-color: rgb(255, 0, 0);
+    background-color: var(--red);
     border-radius: 5px;
     text-decoration: underline;
 }
@@ -335,10 +367,8 @@ export default {
 .home .add-task {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    width: 70%;
     align-items: center;
-    margin: auto;
-    background-color: #f1f1f1;
 }
 
 .home .add-task form {
@@ -350,14 +380,18 @@ export default {
     padding: 0.6rem 1rem;
     margin-top: 1rem;
     border-radius: 5px;
-    border: 1px solid gray;
+    border: 1px solid var(--gray);
+    font-family: var(--font-family-home);
     cursor: pointer;
+    color: var(--white);
+    background-color: var(--background-color-buttons);
 }
 
 .home .add-task .add-new-button:hover {
     border-radius: 5px;
-    background-color: gray;
-    color: white;
+    background-color: var(--faded-blue);
+    color: var(--white);
+
 }
 
 .home .add-task form .form-group {
@@ -368,24 +402,26 @@ export default {
 }
 
 .home .add-task form .form-group label {
-    flex-basis: 70px;
+    flex-basis: 100px;
 }
 
 .home .add-task form input {
     width: 250px;
     padding: 0.4rem 1rem;
     border-radius: 5px;
-    border: 1px solid gray;
+    border: 1px solid var(--gray);
 
 }
 
 .home .add-task form button {
     padding: 0.5rem 1rem;
     border-radius: 5px;
-    border: 1px solid gray;
+    border: 1px solid var(--gray);
     cursor: pointer;
+    background-color: var(--background-color-buttons);
     width: 150px;
     margin: 1rem auto 0;
+    color: var(--white);
 }
 
 .home .task-list {
@@ -393,7 +429,9 @@ export default {
     flex-direction: column;
     gap: 1rem;
     margin: 1rem 0 2rem;
-    width: 80%;
+    width: 65%;
+    min-width: 500px;
+    background-color: var(--background-color);
     align-items: center;
 
 }
@@ -401,11 +439,12 @@ export default {
 .home .task-list .task {
     display: flex;
     flex-direction: column;
-    background-color: #f1f1f1;
+    background-color: var(--background-color-tasks);
     padding: 1rem;
     width: 100%;
-    border: 1px solid gray;
+    border: 1px solid var(--gray);
     border-radius: 5px;
+    font-family: var(--font-family-tasks);
 }
 
 .home .task-list span {
@@ -416,6 +455,7 @@ export default {
 .home .task-list .task h4 {
     font-size: 1.5rem;
     padding: .5rem 0;
+    font-family: var(--font-family-base);
     text-decoration: underline;
 }
 
@@ -438,7 +478,8 @@ export default {
 .home .task-list .task button {
     padding: 0.4rem 1rem;
     border-radius: 5px;
-    border: 1px solid gray;
+    border: 1px solid var(--gray);
+    font-family: var(--font-family-base);
     margin-top: 1rem;
     cursor: pointer;
 
@@ -446,35 +487,46 @@ export default {
 
 .response {
     padding: 1rem;
+    font-family: var(--font-family-base);
 }
 
 .delete:hover {
-    background-color: rgb(236, 146, 146);
-    color: white;
+    background-color: var(--warning);
+    color: var(--white);
+
     text-decoration: none;
 }
 
+.is_done,
+.edit,
+.delete {
+    background-color: var(--background-color-buttons);
+    color: var(--white);
+
+}
+
 .is_done:hover {
-    background-color: rgb(146, 236, 146);
-    color: white;
+    background-color: var(--success);
+    color: var(--white);
+
 }
 
 .edit:hover {
-    background-color: rgb(146, 146, 236);
-    color: white;
+    background-color: var(--faded-blue);
+    color: var(--white);
+
 }
 
 .done-task {
-    text-decoration: line-through;
-    color: gray;
+    color: var(--background-color-buttons);
 }
 
 
 
 .error {
     color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
+    background-color: var(--warning);
+    border-color: var(--warning);
     padding: 0.75rem 1.25rem;
     margin-bottom: 1rem;
     border: 1px solid transparent;
@@ -489,5 +541,132 @@ export default {
     margin-bottom: 1rem;
     border: 1px solid transparent;
     border-radius: 0.25rem;
+}
+
+.loading img {
+    width: 50px;
+    height: 50px;
+    margin: 1rem;
+}
+
+@media screen and (max-width: 800px) {
+    .home nav .lg {
+        display: none;
+    }
+
+    .home nav {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+
+    }
+
+    .home nav .sm {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        justify-content: space-between;
+        margin: 0 1rem;
+        font-size: .8rem;
+        align-items: center;
+        background-color: var(--background-color);
+        border-bottom: 1px groove var(--gray);
+    }
+
+    .home nav .sm div {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .home .delete-account {
+        font-size: 1rem;
+        cursor: pointer;
+        padding: .5rem 1rem;
+        border-radius: 5px;
+    }
+
+    .home .delete-account:hover {
+        background-color: var(--red);
+        border-radius: 5px;
+        text-decoration: underline;
+    }
+
+    .home nav h3 {
+        padding: .5rem 1rem;
+        margin-right: 1rem;
+        font-size: 1rem;
+    }
+
+}
+
+@media screen and (max-width: 600px) {
+    .home .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin: 1rem 0 2rem;
+        width: 85%;
+        min-width: 200px;
+        align-items: center;
+    }
+
+    .home nav .sm h2 {
+        display: flex;
+        font-size: 1.2rem;
+    }
+
+    .home .task-list .task h4 {
+        font-size: 1.2rem;
+        padding: .3rem 0;
+    }
+
+    .home .task-list .task p {
+        font-size: 1rem;
+        padding: .1rem 0;
+    }
+
+    .home .task-list span {
+        font-size: 1.1rem;
+    }
+
+    .home .add-task form {
+        gap: 1rem;
+    }
+
+    .home .add-task form .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin: 0;
+    }
+
+    .home .add-task form .form-group label {
+        flex-basis: 0;
+        padding: .4rem 0;
+    }
+
+}
+
+@media screen and (max-width:430px) {
+    .home nav .sm h2 {
+        display: flex;
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    .home nav .sm h3 {
+        display: flex;
+        font-size: .9rem;
+        text-align: center;
+    }
+
+    .home .task-list .task button {
+        padding: 0.5rem;
+    }
+
+    .home .task-list .task .buttons {
+        gap: 0.5rem;
+    }
 }
 </style>

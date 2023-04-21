@@ -7,15 +7,18 @@
         <form @submit.prevent="submitLoginForm">
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email"
-                    v-model="email">
+                <input type="email" class="form-control" id="email" placeholder="Enter email" required v-model="email">
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="Password" v-model="password">
+                <input type="password" class="form-control" id="password" placeholder="Password" v-model="password"
+                    required>
             </div>
-            <button type="submit">Login</button>
+            <button type="submit" v-if="!loading">Login</button>
         </form>
+        <div class="loading" v-if="loading">
+            <img src="../../assets/loading.gif" alt="loading gif">
+        </div>
         <router-link to="/register" class="register-link">Or create a new account</router-link>
     </div>
 </template>
@@ -26,6 +29,7 @@ export default {
     props: {},
     data() {
         return {
+            loading: false,
             email: '',
             password: '',
             error: '',
@@ -37,15 +41,18 @@ export default {
     },
     methods: {
         submitLoginForm() {
+            this.loading = true;
             axios.post('/api/sign-in', {
                 email: this.email,
                 password: this.password,
             }).then((response) => {
                 if (response.data.access_token) {
+                    this.loading = false;
                     localStorage.setItem('access_token', response.data.access_token);
                     localStorage.setItem('user', JSON.stringify(response.data.user));
                     this.$router.push('/');
                 } else {
+                    this.loading = false;
                     this.error = response.data.message;
                 }
             }).catch((error) => {
@@ -60,20 +67,26 @@ export default {
 .login {
     display: flex;
     flex-direction: column;
-    height: 70vh;
     justify-content: center;
     margin: auto;
+    height: 100vh;
     align-items: center;
+    background-color: var(--background-color);
+    font-family: var(--font-family-base);
+
 
 }
 
 .response {
     padding: 1rem;
+    font-family: var(--font-family-base);
 }
 
 .login h1 {
     text-align: center;
+    font-family: var(--font-family-base);
     padding: 1rem;
+    text-decoration: underline;
 }
 
 .login form {
@@ -86,31 +99,58 @@ export default {
     display: flex;
     flex-direction: row;
     gap: 0.5rem;
+    align-items: center;
+    font-size: 1rem;
 }
 
 .login form .form-group label {
+    font-family: var(--font-family-base);
     width: 70px;
 }
 
 .login form .form-group input {
-    width: 200px;
+    width: 250px;
     padding: .4rem;
+    font-family: var(--font-family-base);
     border-radius: 4px;
-    border: 1px solid black;
+    border: 1px solid var(--gray);
+    font-size: 1rem;
+
 }
 
 .login form button {
     margin: auto;
-    padding: .4rem 1.3rem;
+    padding: .5rem 1.3rem;
     border-radius: 5px;
     cursor: pointer;
-    border: 1px solid gray;
+    font-family: var(--font-family-base);
+    border: 1px solid var(--gray);
+    font-size: 1rem;
+}
+
+.login form button:hover {
+    background-color: var(--background-color-buttons);
+    color: var(--white);
 }
 
 .login .register-link {
     margin-top: 1.4rem;
     font-size: 1rem;
+    font-family: var(--font-family-base);
     text-decoration: underline;
-    color: black;
+    color: var(--black);
+    ;
+}
+
+.loading img {
+    width: 30px;
+    height: 30px;
+    padding-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .login form .form-group {
+        flex-direction: column;
+    }
 }
 </style>
