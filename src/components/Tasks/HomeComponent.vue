@@ -505,6 +505,8 @@ export default {
 
 }
 
+
+
 .is_done:hover {
     background-color: var(--success);
     color: var(--white);
