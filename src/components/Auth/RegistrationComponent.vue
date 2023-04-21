@@ -2,8 +2,8 @@
     <div class="register">
         <h1>Register</h1>
         <div class="response">
-            <p v-if="response">{{ response }}</p>
-            <p v-if="error">{{ error }}</p>
+            <p v-if="response" class="response">{{ response }}</p>
+            <p v-if="error" class="error">{{ error }}</p>
         </div>
         <form @submit.prevent="signUp">
             <div class="form-group">
@@ -49,6 +49,7 @@ export default {
             })
                 .then((response) => {
                     if (response.data.access_token) {
+                        this.response = response.data.message;
                         this.loading = false;
                         localStorage.setItem('access_token', response.data.access_token);
                         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -60,6 +61,7 @@ export default {
                     }
                 })
                 .catch((error) => {
+                    this.error = error.response.data.message;
                     this.loading = false;
                     console.log(error);
                 })

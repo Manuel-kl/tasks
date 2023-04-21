@@ -2,8 +2,8 @@
     <div class="login">
         <h1>Login</h1>
         <div class="response">
-            <p v-if="response">{{ response }}</p>
-            <p v-if="error">{{ error }}</p>
+            <p v-if="response" class="response">{{ response }}</p>
+            <p v-if="error" class="error">{{ error }}</p>
         </div>
         <form @submit.prevent="submitLoginForm">
             <div class="form-group">
@@ -60,7 +60,9 @@ export default {
                 }
             }).catch((error) => {
                 console.log(error);
+                this.error = error.response.data.message;
             });
+
         }
     },
     mounted() { },
