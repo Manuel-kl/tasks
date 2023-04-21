@@ -2,6 +2,7 @@
     <div class="register">
         <h1>Register</h1>
         <div class="response">
+            <p v-if="response">{{ response }}</p>
             <p v-if="error">{{ error }}</p>
         </div>
         <form @submit.prevent="signUp">
@@ -32,7 +33,8 @@ export default {
             loading: false,
             email: '',
             password: '',
-            error: ''
+            error: '',
+            response: '',
         };
     },
     created() {
@@ -149,6 +151,26 @@ export default {
     width: 30px;
     height: 30px;
     padding-top: 1rem;
+}
+
+.error {
+    color: #721c24;
+    background-color: var(--warning);
+    border-color: var(--warning);
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+}
+
+.success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
 }
 
 @media (max-width: 768px) {
